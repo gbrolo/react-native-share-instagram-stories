@@ -58,8 +58,8 @@ RCT_EXPORT_METHOD(isAvailable:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromi
     resolve([NSNumber numberWithBool:[self checkInstagramApp]]);
 }
 
-RCT_EXPORT_METHOD(shareWithStories:(nonnull NSString *)stickerAssetUri
-                  backgroundAssetUri:(nonnull NSString *)backgroundAssetUri
+RCT_EXPORT_METHOD(shareWithStories:(nonnull NSString *)backgroundAssetUri
+                  stickerAssetUri:(NSString *)stickerAssetUri
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
@@ -68,22 +68,28 @@ RCT_EXPORT_METHOD(shareWithStories:(nonnull NSString *)stickerAssetUri
         return;
     }
 
-    NSString *fileType = [self fileMIMEType:stickerAssetUri];
+    if (backgroundAssetUri == nil) {
+        reject(@"ig_share_failure", @"GENERAL_ERROR", nil );
+    }
+
+    NSString *fileType = [self fileMIMEType:backgroundAssetUri];
 
     if (![fileType isEqualToString:@"image/png"] && ![fileType isEqualToString:@"image/jpeg"]) {
         reject(@"ig_share_failure", @"FILE_TYPE_UNSUPPORTED_ERROR", nil);
         return;
     }
 
-    NSData *stickerAsset = [self loadDataFromUri:stickerAssetUri];
-    NSData *backgroundAsset = [self loadDataFromUri:backgroundAssetUri];
+    NSMutableDictionary *items = [[NSMutableDictionary alloc] init];
 
-    if (stickerAsset == nil || backgroundAsset == nil) {
-        reject(@"ig_share_failure", @"GENERAL_ERROR", nil );
+    NSData *backgroundAsset = [self loadDataFromUri:backgroundAssetUri];
+    [items setValue:backgroundAsset forKey:@"com.instagram.sharedSticker.backgroundImage"];
+
+    if (stickerAssetUri) {
+      NSData *stickerAsset = [self loadDataFromUri:stickerAssetUri];
+      [items setValue:stickerAsset forKey:@"com.instagram.sharedSticker.stickerImage"];
     }
 
-    NSArray *pasteboardItems = @[@{@"com.instagram.sharedSticker.stickerImage" : stickerAsset,
-                                   @"com.instagram.sharedSticker.backgroundImage" : backgroundAsset}];
+    NSArray *pasteboardItems = @[items];
 
     if (@available(iOS 10.0, *)) {
         NSDictionary *pasteboardOptions = @{UIPasteboardOptionExpirationDate : [[NSDate date] dateByAddingTimeInterval:60 * 5]};

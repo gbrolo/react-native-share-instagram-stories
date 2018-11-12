@@ -90,13 +90,12 @@ public class RNShareInstagramStoriesModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public void shareWithStories(String stickerAssetUri, String backgroundAssetUri, Promise promise) {
+  public void shareWithStories(String backgroundAssetUri, String stickerAssetUri, Promise promise) {
     if (!this.checkInstagramApp()) {
       promise.reject(ErrorCodes.NOT_INSTALLED_ERROR.toString());
       return;
     }
 
-    Uri stickerAsset = this.getUriFromString(stickerAssetUri);
     Uri backgroundAsset = this.getUriFromString(backgroundAssetUri);
 
     String fileType = this.getFileMimeType(backgroundAsset.getPath());
@@ -106,14 +105,19 @@ public class RNShareInstagramStoriesModule extends ReactContextBaseJavaModule {
     }
 
     Intent intent = new Intent(INSTAGRAM_STORIES_SHARE);
-    intent.putExtra("interactive_asset_uri", stickerAsset);
     intent.setDataAndType(backgroundAsset, fileType);
     intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
     Activity activity = getCurrentActivity();
-    activity.grantUriPermission(
-            INSTAGRAM_PACKAGE_NAME, stickerAsset,
-            Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+    if (stickerAssetUri != null) {
+        Uri stickerAsset = this.getUriFromString(stickerAssetUri);
+        intent.putExtra("interactive_asset_uri", stickerAsset);
+
+        activity.grantUriPermission(
+                INSTAGRAM_PACKAGE_NAME, stickerAsset,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION);
+    }
 
     try {
       if (activity.getPackageManager().resolveActivity(intent, 0) != null) {
