@@ -20,6 +20,7 @@ NSString *const INSTAGRAM_STORIES_SCHEME = @"instagram-stories://share";
 {
     return @{@"GENERAL_ERROR": @"GENERAL_ERROR",
              @"NOT_INSTALLED_ERROR": @"NOT_INSTALLED_ERROR",
+             @"LAUNCH_ERROR": @"LAUNCH_ERROR",
              @"FILE_TYPE_UNSUPPORTED_ERROR": @"FILE_TYPE_UNSUPPORTED_ERROR"};
 }
 

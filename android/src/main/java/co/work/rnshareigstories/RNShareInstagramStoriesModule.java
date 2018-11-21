@@ -30,7 +30,8 @@ public class RNShareInstagramStoriesModule extends ReactContextBaseJavaModule {
   private enum ErrorCodes {
     GENERAL_ERROR,
     NOT_INSTALLED_ERROR,
-    FILE_TYPE_UNSUPPORTED_ERROR
+    FILE_TYPE_UNSUPPORTED_ERROR,
+    LAUNCH_ERROR
   }
 
   public RNShareInstagramStoriesModule(ReactApplicationContext reactContext) {
@@ -123,6 +124,9 @@ public class RNShareInstagramStoriesModule extends ReactContextBaseJavaModule {
       if (activity.getPackageManager().resolveActivity(intent, 0) != null) {
         activity.startActivityForResult(intent, 0);
         promise.resolve(true);
+      }
+      else {
+        promise.reject(ErrorCodes.LAUNCH_ERROR.toString());
       }
     } catch(Error err) {
       System.err.println(err);
